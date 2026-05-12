@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Corendon Virtual & AJet Virtual - Route Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a2a32; }
+        .map-container { width: 100vw; height: 100vh; position: relative; }
+        #routeMap { width: 100%; height: 100%; background-color: #c8e0f0; z-index: 1; }
+        
+        .custom-map-control {
+            background: rgba(15, 26, 31, 0.95);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .logo-card { display: flex; align-items: center; gap: 12px; }
+        .logo-card img { height: 36px; width: auto; }
+        .legend { display: flex; gap: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #f0f0f0; }
+        .corendon-badge { width: 20px; height: 20px; background-color: #ff8c00; border-radius: 50%; }
+        .ajet-badge { width: 20px; height: 20px; background-color: #003399; border-radius: 50%; }
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            background: rgba(0,0,0,0.6);
+            color: #ccc;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        @media (max-width: 700px) {
+            .custom-map-control { padding: 6px 15px; gap: 12px; }
+            .legend-item span { font-size: 10px; }
+            .logo-card span { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="map-container">
+    <div id="routeMap"></div>
+    <div class="footer">Corendon Virtual & AJet Virtual | Destinations Only (No routes drawn)</div>
+</div>
+
+<script>
+    // ============================================================
+    // AIRPORT COORDINATES
+    // ============================================================
+    const airportCoords = {
+        "LTAI": [36.9003, 30.7935], "LTBJ": [38.2924, 27.1570], "LTFG": [36.5455, 32.3011],
+        "LTAC": [40.1281, 32.9951], "LTFE": [37.2509, 27.6643], "LTAF": [36.9821, 35.2804],
+        "LTFH": [41.2742, 36.3037], "LTAS": [41.5063, 32.0886], "LTBF": [39.6193, 27.9260],
+        "LTCC": [37.8938, 40.2010], "LTBI": [39.7841, 30.5824], "LTAJ": [36.9472, 37.4787],
+        "LTAU": [38.7704, 35.4954], "LTBS": [36.7131, 28.7925], "LTFM": [41.2753, 28.7519],
+        "LTFJ": [40.8986, 29.3092], "LTFO": [41.0026, 40.5217],
+        "EDDB": [52.3667, 13.5033], "EDDW": [53.0475, 8.7867], "EDDC": [51.1328, 13.7672],
+        "EDLL": [51.2895, 6.7668], "EDDE": [50.9798, 10.9581], "EDDF": [50.0333, 8.5706],
+        "EDNY": [47.6713, 9.5115], "EDDH": [53.6304, 9.9882], "EDDV": [52.4611, 9.6851],
+        "EDSB": [48.7794, 8.0805], "EDVK": [51.4086, 9.3777], "EDDK": [50.8659, 7.1427],
+        "EDDP": [51.4238, 12.2363], "EDDM": [48.3538, 11.7861], "EDDG": [52.1346, 7.6848],
+        "EDNN": [49.4987, 11.0781], "EDLP": [51.6141, 8.6163], "ETNL": [53.9181, 12.2783],
+        "EDDR": [49.2146, 7.1095], "EDDS": [48.6899, 9.2220],
+        "LOWG": [46.9911, 15.4396], "LOWL": [48.2332, 14.1875], "LOWS": [47.7933, 13.0043],
+        "LOWW": [48.1103, 16.5697],
+        "EBRR": [50.9262, 3.1168], "EGBB": [52.4539, -1.7480], "EGGD": [51.3827, -2.7191],
+        "EGPF": [55.8719, -4.4331], "EGKK": [51.1481, -0.1903], "EGSS": [51.8850, 0.2350],
+        "EGCC": [53.3537, -2.2750], "EGNT": [55.0375, -1.6917], "EHAM": [52.3081, 4.7642],
+        "LHBP": [47.4369, 19.2556], "EPGD": [54.3776, 18.4662], "EPKT": [50.4742, 19.0800],
+        "EPPO": [52.4211, 16.8263], "EPWA": [52.1657, 20.9671], "EPWR": [51.1027, 16.8858],
+        "LROP": [44.5711, 26.0850], "LZIP": [48.1702, 17.2127], "LJLJ": [46.2237, 14.4576],
+        "LFSB": [47.5900, 7.5292], "LSZH": [47.4581, 8.5481], "EBBR": [50.9014, 4.4844],
+        "EHRD": [51.9569, 4.4372],
+        "ULLI": [59.8003, 30.2625], "ESSA": [59.6519, 17.9186], "EKCH": [55.6181, 12.6560],
+        "LFPG": [49.0097, 2.5479], "LSGG": [46.2383, 6.1095], "DAAG": [36.6910, 3.2154],
+        "LIRF": [41.8003, 12.2389], "LKPR": [50.1008, 14.2600], "LQSA": [43.8246, 18.3315],
+        "BKPR": [42.5728, 21.0358], "LYBE": [44.8184, 20.3091], "LATI": [41.4147, 19.7206],
+        "RZV": [41.0026, 40.5217]
+    };
+    
+    // ============================================================
+    // ROUTE DATA - Airports served by each airline
+    // ============================================================
+    const corendonAirports = new Set();
+    const ajetAirports = new Set();
+    
+    const corendonRoutePairs = [
+        ["LTAI","EDDB"],["EDDB","LTAI"],["LTAI","EDDW"],["EDDW","LTAI"],["LTAI","EDDC"],["EDDC","LTAI"],
+        ["LTAI","EDLL"],["EDLL","LTAI"],["LTAI","EDDE"],["EDDE","LTAI"],["LTAI","EDDF"],["EDDF","LTAI"],
+        ["LTAI","EDNY"],["EDNY","LTAI"],["LTAI","EDDH"],["EDDH","LTAI"],["LTAI","EDDV"],["EDDV","LTAI"],
+        ["LTAI","EDSB"],["EDBS","LTAI"],["LTAI","EDVK"],["EDVK","LTAI"],["LTAI","EDDK"],["EDDK","LTAI"],
+        ["LTAI","EDDP"],["EDDP","LTAI"],["LTAI","EDDM"],["EDDM","LTAI"],["LTAI","EDDG"],["EDDG","LTAI"],
+        ["LTAI","EDNN"],["EDNN","LTAI"],["LTAI","EDLP"],["EDLP","LTAI"],["LTAI","ETNL"],["ETNL","LTAI"],
+        ["LTAI","EDDR"],["EDDR","LTAI"],["LTAI","EDDS"],["EDDS","LTAI"],["LTAI","LOWG"],["LOWG","LTAI"],
+        ["LTAI","LOWL"],["LOWL","LTAI"],["LTAI","LOWS"],["LOWS","LTAI"],["LTAI","LOWW"],["LOWW","LTAI"],
+        ["LTAI","EBRR"],["EBRR","LTAI"],["LTAI","EGBB"],["EGBB","LTAI"],["LTAI","EGGD"],["EGGD","LTAI"],
+        ["LTAI","EGPF"],["EGPF","LTAI"],["LTAI","EGKK"],["EGKK","LTAI"],["LTAI","EGSS"],["EGSS","LTAI"],
+        ["LTAI","EGCC"],["EGCC","LTAI"],["LTAI","EGNT"],["EGNT","LTAI"],["LTAI","EHAM"],["EHAM","LTAI"],
+        ["LTAI","LHBP"],["LHBP","LTAI"],["LTAI","EPGD"],["EPGD","LTAI"],["LTAI","EPKT"],["EPKT","LTAI"],
+        ["LTAI","EPPO"],["EPPO","LTAI"],["LTAI","EPWA"],["EPWA","LTAI"],["LTAI","EPWR"],["EPWR","LTAI"],
+        ["LTAI","LROP"],["LROP","LTAI"],["LTAI","LZIP"],["LZIP","LTAI"],["LTAI","LJLJ"],["LJLJ","LTAI"],
+        ["LTAI","LFSB"],["LFSB","LTAI"],["LTAI","LSZH"],["LSZH","LTAI"],["LTBJ","EDDB"],["EDDB","LTBJ"],
+        ["LTBJ","EDLL"],["EDLL","LTBJ"],["LTBJ","EDHH"],["EDHH","LTBJ"],["LTBJ","EDDV"],["EDDV","LTBJ"],
+        ["LTBJ","EDDK"],["EDDK","LTBJ"],["LTBJ","EDDM"],["EDDM","LTBJ"],["LTBJ","EDNN"],["EDNN","LTBJ"],
+        ["LTBJ","EDDS"],["EDSS","LTBJ"],["LTBJ","LOWW"],["LOWW","LTBJ"],["LTBJ","EBBR"],["EBBR","LTBJ"],
+        ["LTBJ","EGSS"],["EGSS","LTBJ"],["LTBJ","EGCC"],["EGCC","LTBJ"],["LTBJ","EHAM"],["EHAM","LTBJ"],
+        ["LTBJ","EHRD"],["EHRD","LTBJ"],["LTFG","EDDB"],["EDDB","LTFG"],["LTFG","EDDL"],["EDDL","LTFG"],
+        ["LTFG","EDDK"],["EDDK","LTFG"],["LTFG","EDDP"],["EDDP","LTFG"],["LTFG","EDDM"],["EDDM","LTFG"],
+        ["LTFG","EDDN"],["EDDN","LTFG"],["LTFG","EDDS"],["EDSS","LTFG"],["LTFG","EPWA"],["EPWA","LTFG"],
+        ["LTFG","LROP"],["LROP","LTFG"],["LTFG","LRCL"],["LRCL","LTFG"],["LTAC","EDDL"],["EDDL","LTAC"],
+        ["LTAC","EDDK"],["EDDK","LTAC"],["LTAC","EDDN"],["EDNN","LTAC"],["LTFE","EDDV"],["EDDV","LTFE"],
+        ["LTFE","EDDK"],["EDDK","LTFE"],["LTFE","EBBR"],["EBBR","LTFE"],["LTAF","EDDL"],["EDDL","LTAF"],
+        ["LTAF","EDDK"],["EDDK","LTAF"],["LTAF","EDDN"],["EDDN","LTAF"],["LTFH","EDDL"],["EDLL","LTFH"],
+        ["LTFH","EDDV"],["EDDV","LTFH"],["LTAS","EDDL"],["EDDL","LTAS"],["LTAS","EDDK"],["EDDK","LTAS"],
+        ["LTBF","EDDK"],["EDDK","LTBF"],["LTCC","EDDV"],["EDDV","LTCC"],["LTBI","EBBR"],["EBBR","LTBI"],
+        ["LTAJ","EDDV"],["EDDV","LTAJ"],["LTAU","EDDL"],["EDDL","LTAU"],["LTAU","EDDV"],["EDDV","LTAU"],
+        ["LTAU","EDDK"],["EDDK","LTAU"],["LTAU","EDDN"],["EDDN","LTAU"],["LTAU","EHRD"],["EHRD","LTAU"],
+        ["LTBS","EDDL"],["EDDL","LTBS"],["LTBS","EDDK"],["EDDK","LTBS"],["LTBS","EDDN"],["EDDN","LTBS"],
+        ["LTBS","EGBB"],["EGBB","LTBS"],["LTBS","EGKK"],["EGKK","LTBS"],["LTBS","EGCC"],["EGCC","LTBS"],
+        ["LTBS","EGNT"],["EGNT","LTBS"],["LTAI","LTFM"],["LTFM","LTAI"],["LTAI","LTAC"],["LTAC","LTAI"],
+        ["LTAI","LTBJ"],["LTBJ","LTAI"],["LTAI","LTFH"],["LTFH","LTAI"],["LTAI","LTAJ"],["LTAJ","LTAI"],
+        ["LTAI","LTCC"],["LTCC","LTAI"],["LTAI","LTAF"],["LTAF","LTAI"],["LTAI","LTAU"],["LTAU","LTAI"],
+        ["LTBJ","LTFM"],["LTFM","LTBJ"],["LTBJ","LTAC"],["LTAC","LTBJ"],["LTBJ","LTFH"],["LTFH","LTBJ"],
+        ["LTBJ","LTAJ"],["LTAJ","LTBJ"],["LTBJ","LTCC"],["LTCC","LTBJ"],["LTFE","LTFM"],["LTFM","LTFE"],
+        ["LTFE","LTAC"],["LTAC","LTFE"],["LTBS","LTFM"],["LTFM","LTBS"],["LTBS","LTAC"],["LTAC","LTBS"],
+        ["LTAC","LTCC"],["LTCC","LTAC"],["LTAC","LTAJ"],["LTAJ","LTAC"],["LTFM","LTCC"],["LTCC","LTFM"],
+        ["LTFM","LTAJ"],["LTAJ","LTFM"]
+    ];
+    
+    corendonRoutePairs.forEach(pair => { corendonAirports.add(pair[0]); corendonAirports.add(pair[1]); });
+    
+    const ajetRoutePairs = [
+        ["LTFJ","ULLI"],["ULLI","LTFJ"],["LTFJ","ESSA"],["ESSA","LTFJ"],["LTAC","EKCH"],["EKCH","LTAC"],
+        ["LTAC","LFPG"],["LFPG","LTAC"],["LTAC","LSGG"],["LSGG","LTAC"],["LTFJ","DAAG"],["DAAG","LTFJ"],
+        ["LTFJ","LIRF"],["LIRF","LTFJ"],["LTFJ","LKPR"],["LKPR","LTFJ"],["LTFJ","LQSA"],["LQSA","LTFJ"],
+        ["LTFJ","BKPR"],["BKPR","LTFJ"],["LTAC","LYBE"],["LYBE","LTAC"],["LTAC","LATI"],["LATI","LTAC"],
+        ["LTFJ","LTBJ"],["LTBJ","LTFJ"],["LTFJ","LTAI"],["LTAI","LTFJ"],["LTAC","LTFJ"],["LTFJ","LTAC"],
+        ["LTAC","LTFE"],["LTFE","LTAC"],["LTFE","EDDV"],["EDDV","LTFE"],["LTFJ","LTAJ"],["LTAJ","LTFJ"],
+        ["LTFJ","LTFO"],["LTFO","LTFJ"]
+    ];
+    
+    ajetRoutePairs.forEach(pair => { ajetAirports.add(pair[0]); ajetAirports.add(pair[1]); });
+    
+    // ============================================================
+    // MAP SETUP
+    // ============================================================
+    const map = L.map('routeMap').setView([48.0, 15.0], 5);
+    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB',
+        subdomains: 'abcd', maxZoom: 19, minZoom: 3
+    }).addTo(map);
+    
+    // Custom control
+    const CustomControl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function() {
+            const div = L.DomUtil.create('div', 'custom-map-control');
+            div.innerHTML = `
+                <div class="logo-card">
+                    <img id="corendonLogoImg" src="logo.png" alt="Corendon" style="height:36px; width:auto; border-radius:50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'background:#ff8c00; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold; color:white;\\'>C</div>'">
+                    <span style="color:white; font-weight:500;">Corendon Virtual</span>
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><div class="corendon-badge"></div><span>Corendon</span></div>
+                    <div class="legend-item"><div class="ajet-badge"></div><span>AJet (Codeshare)</span></div>
+                </div>
+            `;
+            return div;
+        }
+    });
+    map.addControl(new CustomControl());
+    
+    // ============================================================
+    // MARKER ICONS
+    // ============================================================
+    
+    // CORENDON ICON - Your logo from "logo.png" file
+    const corendonIcon = L.divIcon({
+        html: '<div style="background-color:#ff8c00; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.3);"><img src="logo.png" style="width:30px; height:30px; object-fit:contain;" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'C\'"></div>',
+        iconSize: [34, 34],
+        popupAnchor: [0, -17]
+    });
+    
+    // AJET ICON - Blue only
+    const ajetIcon = L.divIcon({
+        html: '<div style="background-color:#003399; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:bold; color:white; box-shadow:0 2px 6px black;">A</div>',
+        iconSize: [32, 32],
+        popupAnchor: [0, -16]
+    });
+    
+    // MIXED ICON
+    const mixedIcon = L.divIcon({
+        html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 50%, #003399 50%, #003399 100%); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; color:white; text-shadow:0 0 2px black; box-shadow:0 2px 6px black;">C+A</div>',
+        iconSize: [36, 36],
+        popupAnchor: [0, -18]
+    });
+    
+    function getCityName(icao) {
+        const cityMap = {
+            "LTAI":"Antalya","EDDB":"Berlin","EDDW":"Bremen","EDDC":"Dresden","EDLL":"Düsseldorf","EDDE":"Erfurt",
+            "EDDF":"Frankfurt","EDNY":"Friedrichshafen","EDDH":"Hamburg","EDDV":"Hannover","EDSB":"Karlsruhe",
+            "EDVK":"Kassel","EDDK":"Cologne","EDDP":"Leipzig","EDDM":"Munich","EDDG":"Osnabrück","EDNN":"Nuremberg",
+            "EDLP":"Paderborn","ETNL":"Rostock","EDDR":"Saarbrücken","EDDS":"Stuttgart","LOWG":"Graz","LOWL":"Linz",
+            "LOWS":"Salzburg","LOWW":"Vienna","EBRR":"Rumbeke","EGBB":"Birmingham","EGGD":"Bristol","EGPF":"Glasgow",
+            "EGKK":"London Gatwick","EGSS":"London Stansted","EGCC":"Manchester","EGNT":"Newcastle","EHAM":"Amsterdam",
+            "LHBP":"Budapest","EPGD":"Gdańsk","EPKT":"Katowice","EPPO":"Poznań","EPWA":"Warsaw","EPWR":"Wrocław",
+            "LROP":"Bucharest","LZIP":"Bratislava","LJLJ":"Ljubljana","LFSB":"EuroAirport","LSZH":"Zurich","LTBJ":"Izmir",
+            "LTFG":"Alanya","LTAC":"Ankara","LTFE":"Bodrum","LTAF":"Adana","LTFH":"Samsun","LTAS":"Zonguldak",
+            "LTBF":"Balikesir","LTCC":"Diyarbakir","LTBI":"Eskisehir","LTAJ":"Gaziantep","LTAU":"Kayseri","LTBS":"Dalaman",
+            "LTFM":"Istanbul","LTFJ":"Sabiha Gökçen","ULLI":"St Petersburg","ESSA":"Stockholm","EKCH":"Copenhagen",
+            "LFPG":"Paris","LSGG":"Geneva","DAAG":"Algiers","LIRF":"Rome","LKPR":"Prague","LQSA":"Sarajevo",
+            "BKPR":"Pristina","LYBE":"Belgrade","LATI":"Tirana","LTFO":"Rize","RZV":"Rize"
+        };
+        return cityMap[icao] || icao;
+    }
+    
+    // Add markers
+    const allAirports = new Set([...corendonAirports, ...ajetAirports]);
+    
+    allAirports.forEach(icao => {
+        const coords = airportCoords[icao];
+        if(!coords) return;
+        
+        const hasCorendon = corendonAirports.has(icao);
+        const hasAjet = ajetAirports.has(icao);
+        
+        let icon;
+        if(hasCorendon && hasAjet) icon = mixedIcon;
+        else if(hasCorendon) icon = corendonIcon;
+        else icon = ajetIcon;
+        
+        const marker = L.marker(coords, { icon: icon }).addTo(map);
+        marker.bindPopup(`<strong>${icao}</strong><br>${getCityName(icao)}`);
+    });
+    
+    setTimeout(() => map.invalidateSize(), 200);
+</script>
+</body>
+</html>
