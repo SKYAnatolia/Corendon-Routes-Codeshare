@@ -22,9 +22,12 @@
             gap: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.2);
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
         }
         .logo-card { display: flex; align-items: center; gap: 12px; }
-        .logo-card img { height: 36px; width: auto; }
         .legend { display: flex; gap: 20px; }
         .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #f0f0f0; }
         .corendon-badge { width: 20px; height: 20px; background-color: #ff8c00; border-radius: 50%; }
@@ -41,8 +44,17 @@
             z-index: 1000;
             pointer-events: none;
         }
+        
+        /* MARKER'LARDAKİ TÜM KARE VE GÖLGELERİ YOK ET */
+        .leaflet-marker-icon {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
         @media (max-width: 700px) {
-            .custom-map-control { padding: 6px 15px; gap: 12px; }
+            .custom-map-control { padding: 6px 15px; gap: 12px; top: 10px; right: 10px; }
             .legend-item span { font-size: 10px; }
             .logo-card span { font-size: 12px; }
         }
@@ -51,10 +63,23 @@
 <body>
 <div class="map-container">
     <div id="routeMap"></div>
-    <div class="footer">Corendon Virtual & AJet Virtual | Destinations Only (No routes drawn)</div>
+    <div class="custom-map-control">
+        <div class="logo-card">
+            <div style="background:#ff8c00; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold; color:white;">C</div>
+            <span style="color:white; font-weight:500;">Corendon Virtual</span>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="corendon-badge"></div><span>Corendon</span></div>
+            <div class="legend-item"><div class="ajet-badge"></div><span>AJet (Codeshare)</span></div>
+        </div>
+    </div>
+    <div class="footer">Corendon Virtual & AJet Virtual | Destinations Only</div>
 </div>
 
 <script>
+    // ============================================================
+    // HAVALİMANI KOORDİNATLARI
+    // ============================================================
     const airportCoords = {
         "LTAI": [36.9003, 30.7935], "LTBJ": [38.2924, 27.1570], "LTFG": [36.5455, 32.3011],
         "LTAC": [40.1281, 32.9951], "LTFE": [37.2509, 27.6643], "LTAF": [36.9821, 35.2804],
@@ -85,6 +110,10 @@
         "BKPR": [42.5728, 21.0358], "LYBE": [44.8184, 20.3091], "LATI": [41.4147, 19.7206],
         "RZV": [41.0026, 40.5217]
     };
+
+    // ============================================================
+    // ROTA VERİLERİ
+    // ============================================================
     const corendonAirports = new Set();
     const ajetAirports = new Set();
     
@@ -144,44 +173,41 @@
     ];
     
     ajetRoutePairs.forEach(pair => { ajetAirports.add(pair[0]); ajetAirports.add(pair[1]); });
+
+    // ============================================================
+    // HARİTA
+    // ============================================================
     const map = L.map('routeMap').setView([48.0, 15.0], 5);
     
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
         subdomains: 'abcd', maxZoom: 19, minZoom: 3
     }).addTo(map);
-    const CustomControl = L.Control.extend({
-        options: { position: 'topright' },
-        onAdd: function() {
-            const div = L.DomUtil.create('div', 'custom-map-control');
-            div.innerHTML = `
-                <div class="logo-card">
-                    <img id="corendonLogoImg" src="/logo.png" alt="Corendon" style="height:36px; width:auto; border-radius:50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'background:#ff8c00; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold; color:white;\\'>C</div>'">
-                    <span style="color:white; font-weight:500;">Corendon Virtual</span>
-                </div>
-                <div class="legend">
-                    <div class="legend-item"><div class="corendon-badge"></div><span>Corendon</span></div>
-                    <div class="legend-item"><div class="ajet-badge"></div><span>AJet (Codeshare)</span></div>
-                </div>
-            `;
-            return div;
-        }
+
+    // ============================================================
+    // MARKER ICONLARI - KARE YOK, SADECE YUVARLAK
+    // ============================================================
     const corendonIcon = L.divIcon({
-    html: '<div style="background-color:#ff8c00; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: none; border: none;"><img src="logo.png" style="width:30px; height:30px; object-fit:contain;" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'C\'"></div>',
-    iconSize: [34, 34],
-    popupAnchor: [0, -17]
-});
-   const ajetIcon = L.divIcon({
-    html: '<div style="background-color:#003399; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:bold; color:white; box-shadow: none; border: none;">A</div>',
-    iconSize: [32, 32],
-    popupAnchor: [0, -16]
-});
-   const mixedIcon = L.divIcon({
-    html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 50%, #003399 50%, #003399 100%); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; color:white;">C+A</div>',
-    iconSize: [36, 36],
-    popupAnchor: [0, -18],
-    className: 'custom-marker'   // <--- BUNU EKLE
+        html: '<div style="background:#ff8c00; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; color:white;">C</div>',
+        iconSize: [32, 32],
+        popupAnchor: [0, -16],
+        className: ''
     });
+    
+    const ajetIcon = L.divIcon({
+        html: '<div style="background:#003399; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; color:white;">A</div>',
+        iconSize: [32, 32],
+        popupAnchor: [0, -16],
+        className: ''
+    });
+    
+    const mixedIcon = L.divIcon({
+        html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 50%, #003399 50%, #003399 100%); width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; color:white;">C+A</div>',
+        iconSize: [34, 34],
+        popupAnchor: [0, -17],
+        className: ''
+    });
+
     function getCityName(icao) {
         const cityMap = {
             "LTAI":"Antalya","EDDB":"Berlin","EDDW":"Bremen","EDDC":"Dresden","EDLL":"Düsseldorf","EDDE":"Erfurt",
@@ -200,6 +226,10 @@
         };
         return cityMap[icao] || icao;
     }
+    
+    // ============================================================
+    // MARKER'LARI EKLE
+    // ============================================================
     const allAirports = new Set([...corendonAirports, ...ajetAirports]);
     
     allAirports.forEach(icao => {
@@ -214,20 +244,8 @@
         else if(hasCorendon) icon = corendonIcon;
         else icon = ajetIcon;
         
-        const marker = L.marker(coords, { icon: icon }).addTo(map);
-        marker.bindPopup(`<strong>${icao}</strong><br>${getCityName(icao)}`);
+        L.marker(coords, { icon: icon }).addTo(map).bindPopup(`<strong>${icao}</strong><br>${getCityName(icao)}`);
     });
-    .custom-marker {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    }
-    
-    .custom-marker div {
-        box-shadow: none !important;
-        border: none !important;
-        outline: none !important;
-    }
     
     setTimeout(() => map.invalidateSize(), 200);
 </script>
