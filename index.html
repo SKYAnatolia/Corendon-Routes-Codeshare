@@ -168,19 +168,22 @@
         }
     });
     const corendonIcon = L.divIcon({
-    html: '<div style="background-color:#ff8c00; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: none; border: none;"><img src="logo.png" style="width:30px; height:30px; object-fit:contain;" onerror="this.style.display=\'none\'; this.parentElement.innerHTML=\'C\'"></div>',
+    html: '<div style="background-color:#ff8c00; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; color:white;">C</div>',
     iconSize: [34, 34],
-    popupAnchor: [0, -17]
+    popupAnchor: [0, -17],
+    className: 'custom-marker'   // <--- BUNU EKLE
     });
-    const ajetIcon = L.divIcon({
-        html: '<div style="background-color:#003399; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:bold; color:white; box-shadow:0 2px 6px black;">A</div>',
-        iconSize: [32, 32],
-        popupAnchor: [0, -16]
+   const ajetIcon = L.divIcon({
+    html: '<div style="background-color:#003399; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:bold; color:white;">A</div>',
+    iconSize: [32, 32],
+    popupAnchor: [0, -16],
+    className: 'custom-marker'
     });
-    const mixedIcon = L.divIcon({
-        html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 50%, #003399 50%, #003399 100%); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; color:white; text-shadow:0 0 2px black; box-shadow:0 2px 6px black;">C+A</div>',
-        iconSize: [36, 36],
-        popupAnchor: [0, -18]
+   const mixedIcon = L.divIcon({
+    html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 50%, #003399 50%, #003399 100%); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; color:white;">C+A</div>',
+    iconSize: [36, 36],
+    popupAnchor: [0, -18],
+    className: 'custom-marker'   // <--- BUNU EKLE
     });
     function getCityName(icao) {
         const cityMap = {
@@ -217,6 +220,17 @@
         const marker = L.marker(coords, { icon: icon }).addTo(map);
         marker.bindPopup(`<strong>${icao}</strong><br>${getCityName(icao)}`);
     });
+    .custom-marker {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    }
+    
+    .custom-marker div {
+        box-shadow: none !important;
+        border: none !important;
+        outline: none !important;
+    }
     
     setTimeout(() => map.invalidateSize(), 200);
 </script>
