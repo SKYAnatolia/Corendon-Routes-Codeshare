@@ -219,7 +219,10 @@
         marker.bindPopup(`<strong>${icao}</strong><br>${getCityName(icao)}`);
     });
     
-    setTimeout(() => map.invalidateSize(), 200);
+    setTimeout(() => {
+    map.invalidateSize();
+    map.setView([48.0, 15.0], 5);
+}, 500);
 </script>
 </body>
 </html>
