@@ -84,6 +84,7 @@
         "LIRF": [41.8003, 12.2389], "LKPR": [50.1008, 14.2600], "LQSA": [43.8246, 18.3315],
         "BKPR": [42.5728, 21.0358], "LYBE": [44.8184, 20.3091], "LATI": [41.4147, 19.7206],
         "RZV": [41.0026, 40.5217]
+    };
     const corendonAirports = new Set();
     const ajetAirports = new Set();
     
@@ -182,7 +183,6 @@
         iconSize: [36, 36],
         popupAnchor: [0, -18]
     });
-    
     function getCityName(icao) {
         const cityMap = {
             "LTAI":"Antalya","EDDB":"Berlin","EDDW":"Bremen","EDDC":"Dresden","EDLL":"Düsseldorf","EDDE":"Erfurt",
@@ -219,10 +219,7 @@
         marker.bindPopup(`<strong>${icao}</strong><br>${getCityName(icao)}`);
     });
     
-    setTimeout(() => {
-    map.invalidateSize();
-    map.setView([48.0, 15.0], 5);
-}, 500);
+    setTimeout(() => map.invalidateSize(), 200);
 </script>
 </body>
 </html>
