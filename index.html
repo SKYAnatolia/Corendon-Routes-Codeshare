@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Corendon Virtual & AJet Virtual - Route Map</title>
+    <title>Corendon Virtual - AJet Virtual - Etihad Virtual Route Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -26,12 +26,13 @@
             top: 15px;
             right: 15px;
             z-index: 1000;
+            flex-wrap: wrap;
         }
-        .logo-card { display: flex; align-items: center; gap: 12px; }
-        .legend { display: flex; gap: 20px; }
+        .legend { display: flex; gap: 20px; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #f0f0f0; }
         .corendon-badge { width: 20px; height: 20px; background-color: #ff8c00; border-radius: 50%; }
         .ajet-badge { width: 20px; height: 20px; background-color: #003399; border-radius: 50%; }
+        .etihad-badge { width: 20px; height: 20px; background-color: #2C5F2D; border-radius: 50%; }
         .footer {
             position: absolute;
             bottom: 10px;
@@ -45,7 +46,6 @@
             pointer-events: none;
         }
         
-        /* MARKER'LARDAKİ TÜM KARE VE GÖLGELERİ YOK ET */
         .leaflet-marker-icon {
             background: transparent !important;
             border: none !important;
@@ -56,7 +56,6 @@
         @media (max-width: 700px) {
             .custom-map-control { padding: 6px 15px; gap: 12px; top: 10px; right: 10px; }
             .legend-item span { font-size: 10px; }
-            .logo-card span { font-size: 12px; }
         }
     </style>
 </head>
@@ -64,16 +63,12 @@
 <div class="map-container">
     <div id="routeMap"></div>
     <div class="custom-map-control">
-        <div class="logo-card">
-            <div style="background:#ff8c00; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold; color:white;">C</div>
-            <span style="color:white; font-weight:500;">Corendon Virtual</span>
-        </div>
         <div class="legend">
-            <div class="legend-item"><div class="corendon-badge"></div><span>Corendon</span></div>
-            <div class="legend-item"><div class="ajet-badge"></div><span>AJet (Codeshare)</span></div>
+            <div class="legend-item"><div class="corendon-badge"></div><span>Corendon Virtual</span></div>
+            <div class="legend-item"><div class="ajet-badge"></div><span>AJet Virtual</span></div>
+            <div class="legend-item"><div class="etihad-badge"></div><span>Etihad Virtual</span></div>
         </div>
     </div>
-    <div class="footer">Corendon Virtual & AJet Virtual | Destinations Only</div>
 </div>
 
 <script>
@@ -81,6 +76,7 @@
     // HAVALİMANI KOORDİNATLARI
     // ============================================================
     const airportCoords = {
+        // Corendon (Türkiye + Avrupa)
         "LTAI": [36.9003, 30.7935], "LTBJ": [38.2924, 27.1570], "LTFG": [36.5455, 32.3011],
         "LTAC": [40.1281, 32.9951], "LTFE": [37.2509, 27.6643], "LTAF": [36.9821, 35.2804],
         "LTFH": [41.2742, 36.3037], "LTAS": [41.5063, 32.0886], "LTBF": [39.6193, 27.9260],
@@ -104,19 +100,35 @@
         "LROP": [44.5711, 26.0850], "LZIP": [48.1702, 17.2127], "LJLJ": [46.2237, 14.4576],
         "LFSB": [47.5900, 7.5292], "LSZH": [47.4581, 8.5481], "EBBR": [50.9014, 4.4844],
         "EHRD": [51.9569, 4.4372],
+        
+        // AJet (Rusya, İskandinavya, Balkanlar)
         "ULLI": [59.8003, 30.2625], "ESSA": [59.6519, 17.9186], "EKCH": [55.6181, 12.6560],
         "LFPG": [49.0097, 2.5479], "LSGG": [46.2383, 6.1095], "DAAG": [36.6910, 3.2154],
         "LIRF": [41.8003, 12.2389], "LKPR": [50.1008, 14.2600], "LQSA": [43.8246, 18.3315],
         "BKPR": [42.5728, 21.0358], "LYBE": [44.8184, 20.3091], "LATI": [41.4147, 19.7206],
-        "RZV": [41.0026, 40.5217]
+        "RZV": [41.0026, 40.5217],
+        
+        // Etihad SADECE Orta Doğu (verdiğin listeden)
+        "OMAA": [24.4333, 54.6511],  // Abu Dhabi
+        "OEJN": [21.6796, 39.1565],  // Jeddah
+        "OEMA": [24.5534, 46.7252],  // Riyadh
+        "OTHH": [25.2731, 51.6081],  // Doha
+        "OBBI": [26.2708, 50.6336],  // Bahrain
+        "OOMS": [23.5933, 58.2844],  // Muscat
+        "OERK": [24.9576, 46.6988],  // Riyadh (King Khalid)
+        "OEDF": [28.3353, 46.1251],  // Dammam
+        "OKKK": [29.2266, 47.9689],  // Kuwait
+        "HECA": [30.1219, 31.4056]   // Cairo
     };
 
     // ============================================================
-    // ROTA VERİLERİ
+    // ÜÇ HAVAYOLU İÇİN KÜMELER - AYRI AYRI
     // ============================================================
     const corendonAirports = new Set();
     const ajetAirports = new Set();
+    const etihadAirports = new Set();
     
+    // 1. CORENDON (Türkiye ↔ Avrupa)
     const corendonRoutePairs = [
         ["LTAI","EDDB"],["EDDB","LTAI"],["LTAI","EDDW"],["EDDW","LTAI"],["LTAI","EDDC"],["EDDC","LTAI"],
         ["LTAI","EDLL"],["EDLL","LTAI"],["LTAI","EDDE"],["EDDE","LTAI"],["LTAI","EDDF"],["EDDF","LTAI"],
@@ -162,6 +174,7 @@
     
     corendonRoutePairs.forEach(pair => { corendonAirports.add(pair[0]); corendonAirports.add(pair[1]); });
     
+    // 2. AJET (SADECE verdiğin AJet listesi - Rusya/İskandinavya/Balkanlar)
     const ajetRoutePairs = [
         ["LTFJ","ULLI"],["ULLI","LTFJ"],["LTFJ","ESSA"],["ESSA","LTFJ"],["LTAC","EKCH"],["EKCH","LTAC"],
         ["LTAC","LFPG"],["LFPG","LTAC"],["LTAC","LSGG"],["LSGG","LTAC"],["LTFJ","DAAG"],["DAAG","LTFJ"],
@@ -173,64 +186,95 @@
     ];
     
     ajetRoutePairs.forEach(pair => { ajetAirports.add(pair[0]); ajetAirports.add(pair[1]); });
+    
+    // 3. ETIHAD (SADECE verdiğin Etihad listesi - Orta Doğu + Antalya)
+    const etihadRoutePairs = [
+        ["LTAI","OMAA"],["OMAA","LTAI"],
+        ["OMAA","OEJN"],["OEJN","OMAA"],
+        ["OMAA","OEMA"],["OEMA","OMAA"],
+        ["OMAA","OTHH"],["OTHH","OMAA"],
+        ["OMAA","OBBI"],["OBBI","OMAA"],
+        ["OMAA","OOMS"],["OOMS","OMAA"],
+        ["OMAA","OERK"],["OERK","OMAA"],
+        ["OMAA","OEDF"],["OEDF","OMAA"],
+        ["OMAA","OKKK"],["OKKK","OMAA"],
+        ["OMAA","HECA"],["HECA","OMAA"]
+    ];
+    
+    etihadRoutePairs.forEach(pair => { etihadAirports.add(pair[0]); etihadAirports.add(pair[1]); });
 
     // ============================================================
-    // HARİTA
+    // HARİTA ve MARKER'LAR
     // ============================================================
-    const map = L.map('routeMap').setView([48.0, 15.0], 5);
+    const map = L.map('routeMap').setView([40.0, 30.0], 4);
     
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
         subdomains: 'abcd', maxZoom: 19, minZoom: 3
     }).addTo(map);
 
-    // ============================================================
-    // MARKER ICONLARI - KARE YOK, SADECE YUVARLAK
-    // ============================================================
+    // ICONLAR
     const corendonIcon = L.divIcon({
-        html: '<div style="background:#ff8c00; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; color:white;">C</div>',
-        iconSize: [32, 32],
-        popupAnchor: [0, -16],
-        className: ''
+        html: '<div style="background:#ff8c00; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; color:white;">C</div>',
+        iconSize: [30, 30], popupAnchor: [0, -15], className: ''
     });
     
     const ajetIcon = L.divIcon({
-        html: '<div style="background:#003399; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; color:white;">A</div>',
-        iconSize: [32, 32],
-        popupAnchor: [0, -16],
-        className: ''
+        html: '<div style="background:#003399; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; color:white;">A</div>',
+        iconSize: [30, 30], popupAnchor: [0, -15], className: ''
     });
     
-    const mixedIcon = L.divIcon({
-        html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 50%, #003399 50%, #003399 100%); width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; color:white;">C+A</div>',
-        iconSize: [34, 34],
-        popupAnchor: [0, -17],
-        className: ''
+    const etihadIcon = L.divIcon({
+        html: '<div style="background:#2C5F2D; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; color:white;">E</div>',
+        iconSize: [30, 30], popupAnchor: [0, -15], className: ''
+    });
+    
+    const corendonAjetIcon = L.divIcon({
+        html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 50%, #003399 50%, #003399 100%); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:white;">C+A</div>',
+        iconSize: [32, 32], popupAnchor: [0, -16], className: ''
+    });
+    
+    const corendonEtihadIcon = L.divIcon({
+        html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 50%, #2C5F2D 50%, #2C5F2D 100%); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:white;">C+E</div>',
+        iconSize: [32, 32], popupAnchor: [0, -16], className: ''
+    });
+    
+    const ajetEtihadIcon = L.divIcon({
+        html: '<div style="background: linear-gradient(135deg, #003399 0%, #003399 50%, #2C5F2D 50%, #2C5F2D 100%); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:bold; color:white;">A+E</div>',
+        iconSize: [32, 32], popupAnchor: [0, -16], className: ''
+    });
+    
+    const allThreeIcon = L.divIcon({
+        html: '<div style="background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 33%, #003399 33%, #003399 66%, #2C5F2D 66%, #2C5F2D 100%); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:white;">C+A+E</div>',
+        iconSize: [36, 36], popupAnchor: [0, -18], className: ''
     });
 
     function getCityName(icao) {
         const cityMap = {
-            "LTAI":"Antalya","EDDB":"Berlin","EDDW":"Bremen","EDDC":"Dresden","EDLL":"Düsseldorf","EDDE":"Erfurt",
-            "EDDF":"Frankfurt","EDNY":"Friedrichshafen","EDDH":"Hamburg","EDDV":"Hannover","EDSB":"Karlsruhe",
-            "EDVK":"Kassel","EDDK":"Cologne","EDDP":"Leipzig","EDDM":"Munich","EDDG":"Osnabrück","EDNN":"Nuremberg",
-            "EDLP":"Paderborn","ETNL":"Rostock","EDDR":"Saarbrücken","EDDS":"Stuttgart","LOWG":"Graz","LOWL":"Linz",
-            "LOWS":"Salzburg","LOWW":"Vienna","EBRR":"Rumbeke","EGBB":"Birmingham","EGGD":"Bristol","EGPF":"Glasgow",
-            "EGKK":"London Gatwick","EGSS":"London Stansted","EGCC":"Manchester","EGNT":"Newcastle","EHAM":"Amsterdam",
-            "LHBP":"Budapest","EPGD":"Gdańsk","EPKT":"Katowice","EPPO":"Poznań","EPWA":"Warsaw","EPWR":"Wrocław",
-            "LROP":"Bucharest","LZIP":"Bratislava","LJLJ":"Ljubljana","LFSB":"EuroAirport","LSZH":"Zurich","LTBJ":"Izmir",
-            "LTFG":"Alanya","LTAC":"Ankara","LTFE":"Bodrum","LTAF":"Adana","LTFH":"Samsun","LTAS":"Zonguldak",
-            "LTBF":"Balikesir","LTCC":"Diyarbakir","LTBI":"Eskisehir","LTAJ":"Gaziantep","LTAU":"Kayseri","LTBS":"Dalaman",
-            "LTFM":"Istanbul","LTFJ":"Sabiha Gökçen","ULLI":"St Petersburg","ESSA":"Stockholm","EKCH":"Copenhagen",
-            "LFPG":"Paris","LSGG":"Geneva","DAAG":"Algiers","LIRF":"Rome","LKPR":"Prague","LQSA":"Sarajevo",
-            "BKPR":"Pristina","LYBE":"Belgrade","LATI":"Tirana","LTFO":"Rize","RZV":"Rize"
+            "LTAI":"Antalya","EDDB":"Berlin","LTBJ":"Izmir","LTFG":"Alanya","LTAC":"Ankara","LTFE":"Bodrum",
+            "LTAF":"Adana","LTFH":"Samsun","LTAS":"Zonguldak","LTBF":"Balikesir","LTCC":"Diyarbakir",
+            "LTBI":"Eskisehir","LTAJ":"Gaziantep","LTAU":"Kayseri","LTBS":"Dalaman","LTFM":"Istanbul",
+            "LTFJ":"Sabiha Gökçen","LTFO":"Rize",
+            "OMAA":"Abu Dhabi","OEJN":"Jeddah","OEMA":"Riyadh","OTHH":"Doha","OBBI":"Bahrain",
+            "OOMS":"Muscat","OERK":"Riyadh","OEDF":"Dammam","OKKK":"Kuwait","HECA":"Cairo",
+            "ULLI":"St Petersburg","ESSA":"Stockholm","EKCH":"Copenhagen","LFPG":"Paris","LSGG":"Geneva",
+            "DAAG":"Algiers","LIRF":"Rome","LKPR":"Prague","LQSA":"Sarajevo","BKPR":"Pristina",
+            "LYBE":"Belgrade","LATI":"Tirana","RZV":"Rize",
+            "EDDW":"Bremen","EDDC":"Dresden","EDLL":"Düsseldorf","EDDE":"Erfurt","EDDF":"Frankfurt",
+            "EDNY":"Friedrichshafen","EDDH":"Hamburg","EDDV":"Hannover","EDSB":"Karlsruhe","EDVK":"Kassel",
+            "EDDK":"Cologne","EDDP":"Leipzig","EDDM":"Munich","EDDG":"Osnabrück","EDNN":"Nuremberg",
+            "EDLP":"Paderborn","ETNL":"Rostock","EDDR":"Saarbrücken","EDDS":"Stuttgart","LOWG":"Graz",
+            "LOWL":"Linz","LOWS":"Salzburg","LOWW":"Vienna","EBRR":"Rumbeke","EGBB":"Birmingham",
+            "EGGD":"Bristol","EGPF":"Glasgow","EGKK":"London Gatwick","EGSS":"London Stansted",
+            "EGCC":"Manchester","EGNT":"Newcastle","EHAM":"Amsterdam","LHBP":"Budapest","EPGD":"Gdańsk",
+            "EPKT":"Katowice","EPPO":"Poznań","EPWA":"Warsaw","EPWR":"Wrocław","LROP":"Bucharest",
+            "LZIP":"Bratislava","LJLJ":"Ljubljana","LFSB":"EuroAirport","LSZH":"Zurich","EBBR":"Brussels",
+            "EHRD":"Rotterdam"
         };
         return cityMap[icao] || icao;
     }
     
-    // ============================================================
-    // MARKER'LARI EKLE
-    // ============================================================
-    const allAirports = new Set([...corendonAirports, ...ajetAirports]);
+    const allAirports = new Set([...corendonAirports, ...ajetAirports, ...etihadAirports]);
     
     allAirports.forEach(icao => {
         const coords = airportCoords[icao];
@@ -238,16 +282,24 @@
         
         const hasCorendon = corendonAirports.has(icao);
         const hasAjet = ajetAirports.has(icao);
+        const hasEtihad = etihadAirports.has(icao);
         
         let icon;
-        if(hasCorendon && hasAjet) icon = mixedIcon;
-        else if(hasCorendon) icon = corendonIcon;
-        else icon = ajetIcon;
+        const count = [hasCorendon, hasAjet, hasEtihad].filter(Boolean).length;
+        
+        if (count === 3) icon = allThreeIcon;
+        else if (hasCorendon && hasAjet && !hasEtihad) icon = corendonAjetIcon;
+        else if (hasCorendon && hasEtihad && !hasAjet) icon = corendonEtihadIcon;
+        else if (hasAjet && hasEtihad && !hasCorendon) icon = ajetEtihadIcon;
+        else if (hasCorendon) icon = corendonIcon;
+        else if (hasAjet) icon = ajetIcon;
+        else icon = etihadIcon;
         
         L.marker(coords, { icon: icon }).addTo(map).bindPopup(`<strong>${icao}</strong><br>${getCityName(icao)}`);
     });
     
     setTimeout(() => map.invalidateSize(), 200);
+    console.log("Corendon:", corendonAirports.size, "AJet:", ajetAirports.size, "Etihad:", etihadAirports.size);
 </script>
 </body>
 </html>
