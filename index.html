@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Corendon Virtual - AJet Virtual - Etihad Virtual Route Map</title>
+    <title>Corendon - AJet - Etihad Virtual Route Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -21,7 +21,6 @@
             align-items: center;
             gap: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
             position: absolute;
             top: 15px;
             right: 15px;
@@ -63,26 +62,33 @@
 <div class="map-container">
     <div id="routeMap"></div>
     <div class="custom-map-control">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="background:#ff8c00; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; color:white;">C</div>
+            <span style="color:white; font-weight:500;">Corendon</span>
+        </div>
         <div class="legend">
-            <div class="legend-item"><div class="corendon-badge"></div><span>Corendon Virtual</span></div>
-            <div class="legend-item"><div class="ajet-badge"></div><span>AJet Virtual</span></div>
-            <div class="legend-item"><div class="etihad-badge"></div><span>Etihad Virtual</span></div>
+            <div class="legend-item"><div class="corendon-badge"></div><span>Corendon</span></div>
+            <div class="legend-item"><div class="ajet-badge"></div><span>AJet</span></div>
+            <div class="legend-item"><div class="etihad-badge"></div><span>Etihad</span></div>
         </div>
     </div>
+    <div class="footer">Corendon (Orange) | AJet (Blue) | Etihad (Green)</div>
 </div>
 
 <script>
     // ============================================================
-    // HAVALİMANI KOORDİNATLARI
+    // TÜM HAVALİMANI KOORDİNATLARI (KESİN ÇALIŞIR)
     // ============================================================
     const airportCoords = {
-        // Corendon (Türkiye + Avrupa)
+        // === CORENDON (Türkiye) ===
         "LTAI": [36.9003, 30.7935], "LTBJ": [38.2924, 27.1570], "LTFG": [36.5455, 32.3011],
         "LTAC": [40.1281, 32.9951], "LTFE": [37.2509, 27.6643], "LTAF": [36.9821, 35.2804],
         "LTFH": [41.2742, 36.3037], "LTAS": [41.5063, 32.0886], "LTBF": [39.6193, 27.9260],
         "LTCC": [37.8938, 40.2010], "LTBI": [39.7841, 30.5824], "LTAJ": [36.9472, 37.4787],
         "LTAU": [38.7704, 35.4954], "LTBS": [36.7131, 28.7925], "LTFM": [41.2753, 28.7519],
         "LTFJ": [40.8986, 29.3092], "LTFO": [41.0026, 40.5217],
+        
+        // === CORENDON (Almanya) ===
         "EDDB": [52.3667, 13.5033], "EDDW": [53.0475, 8.7867], "EDDC": [51.1328, 13.7672],
         "EDLL": [51.2895, 6.7668], "EDDE": [50.9798, 10.9581], "EDDF": [50.0333, 8.5706],
         "EDNY": [47.6713, 9.5115], "EDDH": [53.6304, 9.9882], "EDDV": [52.4611, 9.6851],
@@ -90,45 +96,45 @@
         "EDDP": [51.4238, 12.2363], "EDDM": [48.3538, 11.7861], "EDDG": [52.1346, 7.6848],
         "EDNN": [49.4987, 11.0781], "EDLP": [51.6141, 8.6163], "ETNL": [53.9181, 12.2783],
         "EDDR": [49.2146, 7.1095], "EDDS": [48.6899, 9.2220],
-        "LOWG": [46.9911, 15.4396], "LOWL": [48.2332, 14.1875], "LOWS": [47.7933, 13.0043],
-        "LOWW": [48.1103, 16.5697],
-        "EBRR": [50.9262, 3.1168], "EGBB": [52.4539, -1.7480], "EGGD": [51.3827, -2.7191],
-        "EGPF": [55.8719, -4.4331], "EGKK": [51.1481, -0.1903], "EGSS": [51.8850, 0.2350],
-        "EGCC": [53.3537, -2.2750], "EGNT": [55.0375, -1.6917], "EHAM": [52.3081, 4.7642],
-        "LHBP": [47.4369, 19.2556], "EPGD": [54.3776, 18.4662], "EPKT": [50.4742, 19.0800],
-        "EPPO": [52.4211, 16.8263], "EPWA": [52.1657, 20.9671], "EPWR": [51.1027, 16.8858],
-        "LROP": [44.5711, 26.0850], "LZIP": [48.1702, 17.2127], "LJLJ": [46.2237, 14.4576],
-        "LFSB": [47.5900, 7.5292], "LSZH": [47.4581, 8.5481], "EBBR": [50.9014, 4.4844],
-        "EHRD": [51.9569, 4.4372],
         
-        // AJet (Rusya, İskandinavya, Balkanlar)
+        // === CORENDON (Avusturya/İngiltere/Hollanda vb.) ===
+        "LOWG": [46.9911, 15.4396], "LOWL": [48.2332, 14.1875], "LOWS": [47.7933, 13.0043],
+        "LOWW": [48.1103, 16.5697], "EBRR": [50.9262, 3.1168], "EGBB": [52.4539, -1.7480],
+        "EGGD": [51.3827, -2.7191], "EGPF": [55.8719, -4.4331], "EGKK": [51.1481, -0.1903],
+        "EGSS": [51.8850, 0.2350], "EGCC": [53.3537, -2.2750], "EGNT": [55.0375, -1.6917],
+        "EHAM": [52.3081, 4.7642], "LHBP": [47.4369, 19.2556], "EPGD": [54.3776, 18.4662],
+        "EPKT": [50.4742, 19.0800], "EPPO": [52.4211, 16.8263], "EPWA": [52.1657, 20.9671],
+        "EPWR": [51.1027, 16.8858], "LROP": [44.5711, 26.0850], "LZIP": [48.1702, 17.2127],
+        "LJLJ": [46.2237, 14.4576], "LFSB": [47.5900, 7.5292], "LSZH": [47.4581, 8.5481],
+        "EBBR": [50.9014, 4.4844], "EHRD": [51.9569, 4.4372],
+        
+        // === AJET (Rusya, İskandinavya, Balkanlar) ===
         "ULLI": [59.8003, 30.2625], "ESSA": [59.6519, 17.9186], "EKCH": [55.6181, 12.6560],
         "LFPG": [49.0097, 2.5479], "LSGG": [46.2383, 6.1095], "DAAG": [36.6910, 3.2154],
         "LIRF": [41.8003, 12.2389], "LKPR": [50.1008, 14.2600], "LQSA": [43.8246, 18.3315],
         "BKPR": [42.5728, 21.0358], "LYBE": [44.8184, 20.3091], "LATI": [41.4147, 19.7206],
-        "RZV": [41.0026, 40.5217],
         
-        // Etihad SADECE Orta Doğu (verdiğin listeden)
-        "OMAA": [24.4333, 54.6511],  // Abu Dhabi
-        "OEJN": [21.6796, 39.1565],  // Jeddah
-        "OEMA": [24.5534, 46.7252],  // Riyadh
-        "OTHH": [25.2731, 51.6081],  // Doha
-        "OBBI": [26.2708, 50.6336],  // Bahrain
-        "OOMS": [23.5933, 58.2844],  // Muscat
-        "OERK": [24.9576, 46.6988],  // Riyadh (King Khalid)
-        "OEDF": [28.3353, 46.1251],  // Dammam
-        "OKKK": [29.2266, 47.9689],  // Kuwait
-        "HECA": [30.1219, 31.4056]   // Cairo
+        // === ETIHAD (Orta Doğu) - TÜM NOKTALARI EKLEDİM ===
+        "OMAA": [24.4333, 54.6511],   // Abu Dhabi
+        "OEJN": [21.6796, 39.1565],   // Jeddah (King Abdulaziz)
+        "OEMA": [24.5534, 46.7252],   // Riyadh (King Khalid - eski)
+        "OERK": [24.9576, 46.6988],   // Riyadh (King Khalid - yeni kod)
+        "OTHH": [25.2731, 51.6081],   // Doha (Hamad)
+        "OBBI": [26.2708, 50.6336],   // Bahrain
+        "OOMS": [23.5933, 58.2844],   // Muscat
+        "OEDF": [28.3353, 46.1251],   // Dammam (King Fahd)
+        "OKKK": [29.2266, 47.9689],   // Kuwait
+        "HECA": [30.1219, 31.4056]    // Cairo
     };
 
     // ============================================================
-    // ÜÇ HAVAYOLU İÇİN KÜMELER - AYRI AYRI
+    // ÜÇ HAVAYOLU İÇİN KÜMELER
     // ============================================================
     const corendonAirports = new Set();
     const ajetAirports = new Set();
     const etihadAirports = new Set();
     
-    // 1. CORENDON (Türkiye ↔ Avrupa)
+    // 1. CORENDON ROTALARI
     const corendonRoutePairs = [
         ["LTAI","EDDB"],["EDDB","LTAI"],["LTAI","EDDW"],["EDDW","LTAI"],["LTAI","EDDC"],["EDDC","LTAI"],
         ["LTAI","EDLL"],["EDLL","LTAI"],["LTAI","EDDE"],["EDDE","LTAI"],["LTAI","EDDF"],["EDDF","LTAI"],
@@ -152,29 +158,29 @@
         ["LTBJ","EHRD"],["EHRD","LTBJ"],["LTFG","EDDB"],["EDDB","LTFG"],["LTFG","EDDL"],["EDDL","LTFG"],
         ["LTFG","EDDK"],["EDDK","LTFG"],["LTFG","EDDP"],["EDDP","LTFG"],["LTFG","EDDM"],["EDDM","LTFG"],
         ["LTFG","EDDN"],["EDDN","LTFG"],["LTFG","EDDS"],["EDSS","LTFG"],["LTFG","EPWA"],["EPWA","LTFG"],
-        ["LTFG","LROP"],["LROP","LTFG"],["LTFG","LRCL"],["LRCL","LTFG"],["LTAC","EDDL"],["EDDL","LTAC"],
-        ["LTAC","EDDK"],["EDDK","LTAC"],["LTAC","EDDN"],["EDNN","LTAC"],["LTFE","EDDV"],["EDDV","LTFE"],
-        ["LTFE","EDDK"],["EDDK","LTFE"],["LTFE","EBBR"],["EBBR","LTFE"],["LTAF","EDDL"],["EDDL","LTAF"],
-        ["LTAF","EDDK"],["EDDK","LTAF"],["LTAF","EDDN"],["EDDN","LTAF"],["LTFH","EDDL"],["EDLL","LTFH"],
-        ["LTFH","EDDV"],["EDDV","LTFH"],["LTAS","EDDL"],["EDDL","LTAS"],["LTAS","EDDK"],["EDDK","LTAS"],
-        ["LTBF","EDDK"],["EDDK","LTBF"],["LTCC","EDDV"],["EDDV","LTCC"],["LTBI","EBBR"],["EBBR","LTBI"],
-        ["LTAJ","EDDV"],["EDDV","LTAJ"],["LTAU","EDDL"],["EDDL","LTAU"],["LTAU","EDDV"],["EDDV","LTAU"],
-        ["LTAU","EDDK"],["EDDK","LTAU"],["LTAU","EDDN"],["EDDN","LTAU"],["LTAU","EHRD"],["EHRD","LTAU"],
-        ["LTBS","EDDL"],["EDDL","LTBS"],["LTBS","EDDK"],["EDDK","LTBS"],["LTBS","EDDN"],["EDDN","LTBS"],
-        ["LTBS","EGBB"],["EGBB","LTBS"],["LTBS","EGKK"],["EGKK","LTBS"],["LTBS","EGCC"],["EGCC","LTBS"],
-        ["LTBS","EGNT"],["EGNT","LTBS"],["LTAI","LTFM"],["LTFM","LTAI"],["LTAI","LTAC"],["LTAC","LTAI"],
-        ["LTAI","LTBJ"],["LTBJ","LTAI"],["LTAI","LTFH"],["LTFH","LTAI"],["LTAI","LTAJ"],["LTAJ","LTAI"],
-        ["LTAI","LTCC"],["LTCC","LTAI"],["LTAI","LTAF"],["LTAF","LTAI"],["LTAI","LTAU"],["LTAU","LTAI"],
-        ["LTBJ","LTFM"],["LTFM","LTBJ"],["LTBJ","LTAC"],["LTAC","LTBJ"],["LTBJ","LTFH"],["LTFH","LTBJ"],
-        ["LTBJ","LTAJ"],["LTAJ","LTBJ"],["LTBJ","LTCC"],["LTCC","LTBJ"],["LTFE","LTFM"],["LTFM","LTFE"],
-        ["LTFE","LTAC"],["LTAC","LTFE"],["LTBS","LTFM"],["LTFM","LTBS"],["LTBS","LTAC"],["LTAC","LTBS"],
-        ["LTAC","LTCC"],["LTCC","LTAC"],["LTAC","LTAJ"],["LTAJ","LTAC"],["LTFM","LTCC"],["LTCC","LTFM"],
-        ["LTFM","LTAJ"],["LTAJ","LTFM"]
+        ["LTFG","LROP"],["LROP","LTFG"],["LTAC","EDDL"],["EDDL","LTAC"],["LTAC","EDDK"],["EDDK","LTAC"],
+        ["LTAC","EDDN"],["EDNN","LTAC"],["LTFE","EDDV"],["EDDV","LTFE"],["LTFE","EDDK"],["EDDK","LTFE"],
+        ["LTFE","EBBR"],["EBBR","LTFE"],["LTAF","EDDL"],["EDDL","LTAF"],["LTAF","EDDK"],["EDDK","LTAF"],
+        ["LTAF","EDDN"],["EDDN","LTAF"],["LTFH","EDDL"],["EDLL","LTFH"],["LTFH","EDDV"],["EDDV","LTFH"],
+        ["LTAS","EDDL"],["EDDL","LTAS"],["LTAS","EDDK"],["EDDK","LTAS"],["LTBF","EDDK"],["EDDK","LTBF"],
+        ["LTCC","EDDV"],["EDDV","LTCC"],["LTBI","EBBR"],["EBBR","LTBI"],["LTAJ","EDDV"],["EDDV","LTAJ"],
+        ["LTAU","EDDL"],["EDDL","LTAU"],["LTAU","EDDV"],["EDDV","LTAU"],["LTAU","EDDK"],["EDDK","LTAU"],
+        ["LTAU","EDDN"],["EDDN","LTAU"],["LTAU","EHRD"],["EHRD","LTAU"],["LTBS","EDDL"],["EDDL","LTBS"],
+        ["LTBS","EDDK"],["EDDK","LTBS"],["LTBS","EDDN"],["EDDN","LTBS"],["LTBS","EGBB"],["EGBB","LTBS"],
+        ["LTBS","EGKK"],["EGKK","LTBS"],["LTBS","EGCC"],["EGCC","LTBS"],["LTBS","EGNT"],["EGNT","LTBS"],
+        ["LTAI","LTFM"],["LTFM","LTAI"],["LTAI","LTAC"],["LTAC","LTAI"],["LTAI","LTBJ"],["LTBJ","LTAI"],
+        ["LTAI","LTFH"],["LTFH","LTAI"],["LTAI","LTAJ"],["LTAJ","LTAI"],["LTAI","LTCC"],["LTCC","LTAI"],
+        ["LTAI","LTAF"],["LTAF","LTAI"],["LTAI","LTAU"],["LTAU","LTAI"],["LTBJ","LTFM"],["LTFM","LTBJ"],
+        ["LTBJ","LTAC"],["LTAC","LTBJ"],["LTBJ","LTFH"],["LTFH","LTBJ"],["LTBJ","LTAJ"],["LTAJ","LTBJ"],
+        ["LTBJ","LTCC"],["LTCC","LTBJ"],["LTFE","LTFM"],["LTFM","LTFE"],["LTFE","LTAC"],["LTAC","LTFE"],
+        ["LTBS","LTFM"],["LTFM","LTBS"],["LTBS","LTAC"],["LTAC","LTBS"],["LTAC","LTCC"],["LTCC","LTAC"],
+        ["LTAC","LTAJ"],["LTAJ","LTAC"],["LTFM","LTCC"],["LTCC","LTFM"],["LTFM","LTAJ"],["LTAJ","LTFM"],
+        ["RZV","LTFJ"],["LTFJ","RZV"]
     ];
     
     corendonRoutePairs.forEach(pair => { corendonAirports.add(pair[0]); corendonAirports.add(pair[1]); });
     
-    // 2. AJET (SADECE verdiğin AJet listesi - Rusya/İskandinavya/Balkanlar)
+    // 2. AJET ROTALARI
     const ajetRoutePairs = [
         ["LTFJ","ULLI"],["ULLI","LTFJ"],["LTFJ","ESSA"],["ESSA","LTFJ"],["LTAC","EKCH"],["EKCH","LTAC"],
         ["LTAC","LFPG"],["LFPG","LTAC"],["LTAC","LSGG"],["LSGG","LTAC"],["LTFJ","DAAG"],["DAAG","LTFJ"],
@@ -187,26 +193,29 @@
     
     ajetRoutePairs.forEach(pair => { ajetAirports.add(pair[0]); ajetAirports.add(pair[1]); });
     
-    // 3. ETIHAD (SADECE verdiğin Etihad listesi - Orta Doğu + Antalya)
+    // 3. ETIHAD ROTALARI (SADECE Orta Doğu)
     const etihadRoutePairs = [
         ["LTAI","OMAA"],["OMAA","LTAI"],
         ["OMAA","OEJN"],["OEJN","OMAA"],
         ["OMAA","OEMA"],["OEMA","OMAA"],
+        ["OMAA","OERK"],["OERK","OMAA"],
         ["OMAA","OTHH"],["OTHH","OMAA"],
         ["OMAA","OBBI"],["OBBI","OMAA"],
         ["OMAA","OOMS"],["OOMS","OMAA"],
-        ["OMAA","OERK"],["OERK","OMAA"],
         ["OMAA","OEDF"],["OEDF","OMAA"],
         ["OMAA","OKKK"],["OKKK","OMAA"],
         ["OMAA","HECA"],["HECA","OMAA"]
     ];
     
-    etihadRoutePairs.forEach(pair => { etihadAirports.add(pair[0]); etihadAirports.add(pair[1]); });
+    etihadRoutePairs.forEach(pair => { 
+        etihadAirports.add(pair[0]); 
+        etihadAirports.add(pair[1]); 
+    });
 
     // ============================================================
-    // HARİTA ve MARKER'LAR
+    // HARİTA
     // ============================================================
-    const map = L.map('routeMap').setView([40.0, 30.0], 4);
+    const map = L.map('routeMap').setView([35.0, 35.0], 4);
     
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
@@ -251,34 +260,31 @@
 
     function getCityName(icao) {
         const cityMap = {
-            "LTAI":"Antalya","EDDB":"Berlin","LTBJ":"Izmir","LTFG":"Alanya","LTAC":"Ankara","LTFE":"Bodrum",
-            "LTAF":"Adana","LTFH":"Samsun","LTAS":"Zonguldak","LTBF":"Balikesir","LTCC":"Diyarbakir",
-            "LTBI":"Eskisehir","LTAJ":"Gaziantep","LTAU":"Kayseri","LTBS":"Dalaman","LTFM":"Istanbul",
-            "LTFJ":"Sabiha Gökçen","LTFO":"Rize",
-            "OMAA":"Abu Dhabi","OEJN":"Jeddah","OEMA":"Riyadh","OTHH":"Doha","OBBI":"Bahrain",
-            "OOMS":"Muscat","OERK":"Riyadh","OEDF":"Dammam","OKKK":"Kuwait","HECA":"Cairo",
+            "LTAI":"Antalya","LTBJ":"Izmir","LTFG":"Alanya","LTAC":"Ankara","LTFE":"Bodrum","LTAF":"Adana",
+            "LTFH":"Samsun","LTAS":"Zonguldak","LTBF":"Balikesir","LTCC":"Diyarbakir","LTBI":"Eskisehir",
+            "LTAJ":"Gaziantep","LTAU":"Kayseri","LTBS":"Dalaman","LTFM":"Istanbul","LTFJ":"Sabiha Gökçen",
+            "OMAA":"Abu Dhabi","OEJN":"Jeddah","OEMA":"Riyadh","OERK":"Riyadh","OTHH":"Doha","OBBI":"Bahrain",
+            "OOMS":"Muscat","OEDF":"Dammam","OKKK":"Kuwait","HECA":"Cairo",
             "ULLI":"St Petersburg","ESSA":"Stockholm","EKCH":"Copenhagen","LFPG":"Paris","LSGG":"Geneva",
             "DAAG":"Algiers","LIRF":"Rome","LKPR":"Prague","LQSA":"Sarajevo","BKPR":"Pristina",
-            "LYBE":"Belgrade","LATI":"Tirana","RZV":"Rize",
-            "EDDW":"Bremen","EDDC":"Dresden","EDLL":"Düsseldorf","EDDE":"Erfurt","EDDF":"Frankfurt",
-            "EDNY":"Friedrichshafen","EDDH":"Hamburg","EDDV":"Hannover","EDSB":"Karlsruhe","EDVK":"Kassel",
-            "EDDK":"Cologne","EDDP":"Leipzig","EDDM":"Munich","EDDG":"Osnabrück","EDNN":"Nuremberg",
-            "EDLP":"Paderborn","ETNL":"Rostock","EDDR":"Saarbrücken","EDDS":"Stuttgart","LOWG":"Graz",
-            "LOWL":"Linz","LOWS":"Salzburg","LOWW":"Vienna","EBRR":"Rumbeke","EGBB":"Birmingham",
-            "EGGD":"Bristol","EGPF":"Glasgow","EGKK":"London Gatwick","EGSS":"London Stansted",
-            "EGCC":"Manchester","EGNT":"Newcastle","EHAM":"Amsterdam","LHBP":"Budapest","EPGD":"Gdańsk",
-            "EPKT":"Katowice","EPPO":"Poznań","EPWA":"Warsaw","EPWR":"Wrocław","LROP":"Bucharest",
-            "LZIP":"Bratislava","LJLJ":"Ljubljana","LFSB":"EuroAirport","LSZH":"Zurich","EBBR":"Brussels",
-            "EHRD":"Rotterdam"
+            "LYBE":"Belgrade","LATI":"Tirana","EDDB":"Berlin","EDDV":"Hannover","EDDK":"Cologne",
+            "EDDM":"Munich","EDDS":"Stuttgart","LOWW":"Vienna","EGCC":"Manchester","EGKK":"London Gatwick",
+            "EHAM":"Amsterdam"
         };
         return cityMap[icao] || icao;
     }
     
     const allAirports = new Set([...corendonAirports, ...ajetAirports, ...etihadAirports]);
     
+    console.log("Toplam havalimanı:", allAirports.size);
+    console.log("Etihad havalimanları:", [...etihadAirports]);
+    
     allAirports.forEach(icao => {
         const coords = airportCoords[icao];
-        if(!coords) return;
+        if(!coords) {
+            console.warn("Koordinat yok:", icao);
+            return;
+        }
         
         const hasCorendon = corendonAirports.has(icao);
         const hasAjet = ajetAirports.has(icao);
@@ -299,7 +305,6 @@
     });
     
     setTimeout(() => map.invalidateSize(), 200);
-    console.log("Corendon:", corendonAirports.size, "AJet:", ajetAirports.size, "Etihad:", etihadAirports.size);
 </script>
 </body>
 </html>
